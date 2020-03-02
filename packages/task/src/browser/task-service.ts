@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { ApplicationShell, FrontendApplication, WidgetManager } from '@theia/core/lib/browser';
+import { ApplicationShell, FrontendApplication, WidgetManager, WidgetOpenMode } from '@theia/core/lib/browser';
 import { open, OpenerService } from '@theia/core/lib/browser/opener-service';
 import { ILogger, CommandService } from '@theia/core/lib/common';
 import { MessageService } from '@theia/core/lib/common/message-service';
@@ -60,6 +60,7 @@ import { TaskSchemaUpdater } from './task-schema-updater';
 import { TaskConfigurationManager } from './task-configuration-manager';
 import { PROBLEMS_WIDGET_ID, ProblemWidget } from '@theia/markers/lib/browser/problem/problem-widget';
 import { TaskNode } from './task-node';
+import { TaskTerminalWidgetManager, TaskTerminalWidgetOpenerOptions } from './task-terminal-widget-manager';
 
 export interface QuickPickProblemMatcherItem {
     problemMatchers: NamedProblemMatcher[] | undefined;
@@ -174,6 +175,9 @@ export class TaskService implements TaskConfigurationClient {
      */
     @inject(TaskProviderRegistry)
     protected readonly taskProviderRegistry: TaskProviderRegistry;
+
+    @inject(TaskTerminalWidgetManager)
+    protected readonly taskTerminalWidgetManager: TaskTerminalWidgetManager;
 
     @postConstruct()
     protected init(): void {
@@ -974,26 +978,30 @@ export class TaskService implements TaskConfigurationClient {
         const runningTasks: TaskInfo[] = await this.getRunningTasks();
         // Get the corresponding task information based on task id if available.
         const taskInfo: TaskInfo | undefined = runningTasks.find((t: TaskInfo) => t.taskId === taskId);
-        // Create terminal widget to display an execution output of a task that was launched as a command inside a shell.
-        const widget = <TerminalWidget>await this.widgetManager.getOrCreateWidget(
-            TERMINAL_WIDGET_FACTORY_ID,
-            <TerminalWidgetFactoryOptions>{
+        let widgetOpenMode: WidgetOpenMode = 'open';
+        if (taskInfo && taskInfo.config.presentation && taskInfo.config.presentation.reveal === RevealKind.Always) {
+            if (taskInfo.config.presentation.focus) { // assign focus to the terminal if presentation.focus is true
+                widgetOpenMode = 'activate';
+            } else { // show the terminal but not assign focus
+                widgetOpenMode = 'reveal';
+            }
+        }
+
+        // Create / find a terminal widget to display an execution output of a task that was launched as a command inside a shell.
+        const widget = await this.taskTerminalWidgetManager.getOrCreateWidget(
+            <TaskTerminalWidgetOpenerOptions>{
                 created: new Date().toString(),
                 id: this.getTerminalWidgetId(processId),
                 title: taskInfo
                     ? `Task: ${taskInfo.config.label}`
                     : `Task: #${taskId}`,
-                destroyTermOnClose: true
+                destroyTermOnClose: true,
+                widgetOptions: { area: 'bottom' },
+                mode: widgetOpenMode,
+                taskPanel: taskInfo && taskInfo.config.presentation ? taskInfo.config.presentation.panel : undefined,
+                taskConfig: taskInfo ? taskInfo.config : undefined
             }
         );
-        this.shell.addWidget(widget, { area: 'bottom' });
-        if (taskInfo && taskInfo.config.presentation && taskInfo.config.presentation.reveal === RevealKind.Always) {
-            if (taskInfo.config.presentation.focus) { // assign focus to the terminal if presentation.focus is true
-                this.shell.activateWidget(widget.id);
-            } else { // show the terminal but not assign focus
-                this.shell.revealWidget(widget.id);
-            }
-        }
         widget.start(processId);
     }
 

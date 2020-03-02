@@ -47,6 +47,7 @@ export interface TerminalWidgetFactoryOptions extends Partial<TerminalWidgetOpti
 export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget {
 
     private readonly TERMINAL = 'Terminal';
+    private isIdle = true;
     protected readonly onTermDidClose = new Emitter<TerminalWidget>();
     protected terminalId = -1;
     protected term: Xterm.Terminal;
@@ -78,8 +79,7 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
 
     @postConstruct()
     protected init(): void {
-        this.title.caption = this.options.title || this.TERMINAL;
-        this.title.label = this.options.title || this.TERMINAL;
+        this.setTitle(this.options.title || this.TERMINAL);
         this.title.iconClass = 'fa fa-terminal';
 
         if (this.options.destroyTermOnClose === true) {
@@ -254,6 +254,10 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         return this.lastTouchEnd;
     }
 
+    get hasRunningTask(): boolean {
+        return !this.isIdle;
+    }
+
     onDispose(onDispose: () => void): void {
         this.toDispose.push(Disposable.create(onDispose));
     }
@@ -298,6 +302,7 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
     }
 
     protected async attachTerminal(id: number): Promise<number> {
+        this.isIdle = false;
         const terminalId = await this.shellTerminalServer.attach(id);
         if (IBaseTerminalServer.validateId(terminalId)) {
             return terminalId;
@@ -386,9 +391,14 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         if (typeof this.terminalId !== 'number') {
             return;
         }
+        const reuseTerminal = !!this.waitForConnection;
         this.toDisposeOnConnect.dispose();
         this.toDispose.push(this.toDisposeOnConnect);
-        this.term.reset();
+        if (reuseTerminal) {
+            this.term.scrollToBottom();
+        } else {
+            this.term.reset();
+        }
         const waitForConnection = this.waitForConnection = new Deferred<MessageConnection>();
         this.webSocketConnectionProvider.listen({
             path: `${terminalsPath}/${this.terminalId}`,
@@ -401,6 +411,11 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
                         return connection.sendRequest('write', data);
                     }
                 };
+
+                connection.onNotification('onClose', event => {
+                    this.isIdle = true;
+                    this.term.writeln('\x1b[1m\n\rTerminal will be reused by tasks. \x1b[0m\n');
+                });
 
                 const disposable = this.term.onData(sendData);
                 connection.onDispose(() => disposable.dispose());
@@ -533,4 +548,8 @@ export class TerminalWidgetImpl extends TerminalWidget implements StatefulWidget
         this.term.attachCustomKeyEventHandler(e => this.customKeyHandler(e));
     }
 
+    setTitle(title: string): void {
+        this.title.caption = title;
+        this.title.label = title;
+    }
 }

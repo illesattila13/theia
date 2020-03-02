@@ -26,6 +26,11 @@ export abstract class TerminalWidget extends BaseWidget {
     abstract processId: Promise<number>;
 
     /**
+     * Whether the terminal widget runs a task
+     */
+    abstract hasRunningTask: boolean;
+
+    /**
      * Start terminal and return terminal id.
      * @param id - terminal id.
      */
@@ -67,6 +72,8 @@ export abstract class TerminalWidget extends BaseWidget {
      * Whether the terminal process has child processes.
      */
     abstract hasChildProcesses(): Promise<boolean>;
+
+    abstract setTitle(title: string): void;
 }
 
 /**

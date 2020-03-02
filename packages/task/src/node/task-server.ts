@@ -103,7 +103,7 @@ export class TaskServerImpl implements TaskServer, Disposable {
         this.toDispose.get(task.id)!.push(
             task.onExit(event => {
                 this.taskManager.delete(task);
-                this.fireTaskExitedEvent(event);
+                this.fireTaskExitedEvent(event, task);
                 this.removedCachedProblemCollector(event.ctx || '', event.taskId);
                 this.disposeByTaskId(event.taskId);
             })
@@ -160,7 +160,7 @@ export class TaskServerImpl implements TaskServer, Disposable {
         this.toDispose.get(task.id)!.push(task);
 
         const taskInfo = await task.getRuntimeInfo();
-        this.fireTaskCreatedEvent(taskInfo);
+        this.fireTaskCreatedEvent(taskInfo, task);
         return taskInfo;
     }
 
@@ -175,7 +175,7 @@ export class TaskServerImpl implements TaskServer, Disposable {
             client.onTaskExit(event);
         });
 
-        if (task && task instanceof ProcessTask && task.processType === 'process') {
+        if (task && task instanceof ProcessTask) {
             this.clients.forEach(client => {
                 client.onDidEndTaskProcess(event);
             });

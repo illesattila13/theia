@@ -39,6 +39,9 @@ export class TerminalBackendContribution implements MessagingService.Contributio
                 connection.onRequest('write', (data: string) => termProcess.write(data));
                 connection.onClose(() => output.dispose());
                 connection.listen();
+                termProcess.onClose(() => {
+                    connection.sendNotification('onClose', undefined);
+                });
             } else {
                 connection.dispose();
             }
