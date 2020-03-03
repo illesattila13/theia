@@ -61,7 +61,7 @@
     "watch": "yarn build --watch",
     "start": "theia start --plugins=local-dir:../../plugins",
     "start:debug": "yarn start --log-level=debug",
-    "test": "theia test . --test-spec=../api-tests/**/*.spec.js",
+    "test": "theia test . --plugins=local-dir:../../plugins --test-spec=../api-tests/**/*.spec.js",
     "test:debug": "yarn test --test-inspect",
     "coverage": "yarn test --test-coverage && yarn coverage:report",
     "coverage:report": "nyc report --reporter=html",

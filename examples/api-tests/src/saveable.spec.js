@@ -79,9 +79,9 @@ describe('Saveable', function () {
             assert.isTrue(Saveable.isDirty(widget), `should be dirty before '${edit}' save`);
             await Saveable.save(widget);
             assert.isFalse(Saveable.isDirty(widget), `should NOT be dirty after '${edit}' save`);
-            assert.equal(editor.getControl().getValue(), edit, `model should be updated with '${edit}'`);
+            assert.equal(editor.getControl().getValue().trimRight(), edit, `model should be updated with '${edit}'`);
             const state = await fileSystem.resolveContent(fileUri.toString());
-            assert.equal(state.content, edit, `fs should be updated with '${edit}'`);
+            assert.equal(state.content.trimRight(), edit, `fs should be updated with '${edit}'`);
         }
     });
 
@@ -129,7 +129,7 @@ describe('Saveable', function () {
         assert.isTrue(outOfSync, 'file should be out of sync');
         assert.equal(outOfSyncCount, 1, 'user should be prompted only once with out of sync dialog');
         assert.isTrue(Saveable.isDirty(widget), 'should be dirty after rejected save');
-        assert.equal(editor.getControl().getValue(), longContent.substring(3), 'model should be updated');
+        assert.equal(editor.getControl().getValue().trimRight(), longContent.substring(3), 'model should be updated');
         const state = await fileSystem.resolveContent(fileUri.toString());
         assert.equal(state.content, 'baz', 'fs should NOT be updated');
     });
@@ -151,7 +151,7 @@ describe('Saveable', function () {
         await Saveable.save(widget);
         assert.isTrue(outOfSync, 'file should be out of sync');
         assert.isTrue(Saveable.isDirty(widget), 'should be dirty after rejected save');
-        assert.equal(editor.getControl().getValue(), 'bar', 'model should be updated');
+        assert.equal(editor.getControl().getValue().trimRight(), 'bar', 'model should be updated');
         let state = await fileSystem.resolveContent(fileUri.toString());
         assert.equal(state.content, 'baz', 'fs should NOT be updated');
 
@@ -164,9 +164,9 @@ describe('Saveable', function () {
         await Saveable.save(widget);
         assert.isTrue(outOfSync, 'file should be out of sync');
         assert.isFalse(Saveable.isDirty(widget), 'should NOT be dirty after save');
-        assert.equal(editor.getControl().getValue(), 'bar', 'model should be updated');
+        assert.equal(editor.getControl().getValue().trimRight(), 'bar', 'model should be updated');
         state = await fileSystem.resolveContent(fileUri.toString());
-        assert.equal(state.content, 'bar', 'fs should be updated');
+        assert.equal(state.content.trimRight(), 'bar', 'fs should be updated');
     });
 
     it('accept new save', async () => {
@@ -181,9 +181,9 @@ describe('Saveable', function () {
         await Saveable.save(widget);
         assert.isTrue(outOfSync, 'file should be out of sync');
         assert.isFalse(Saveable.isDirty(widget), 'should NOT be dirty after save');
-        assert.equal(editor.getControl().getValue(), 'bar', 'model should be updated');
+        assert.equal(editor.getControl().getValue().trimRight(), 'bar', 'model should be updated');
         const state = await fileSystem.resolveContent(fileUri.toString());
-        assert.equal(state.content, 'bar', 'fs should be updated');
+        assert.equal(state.content.trimRight(), 'bar', 'fs should be updated');
     });
 
     it('cancel save on close', async () => {
@@ -243,7 +243,7 @@ describe('Saveable', function () {
         assert.isTrue(outOfSync, 'file should be out of sync');
         assert.isTrue(widget.isDisposed, 'model should be disposed after close');
         const state = await fileSystem.resolveContent(fileUri.toString());
-        assert.equal(state.content, 'bar', 'fs should be updated');
+        assert.equal(state.content.trimRight(), 'bar', 'fs should be updated');
     });
 
     it('normal close', async () => {
@@ -254,7 +254,7 @@ describe('Saveable', function () {
         });
         assert.isTrue(widget.isDisposed, 'model should be disposed after close');
         const state = await fileSystem.resolveContent(fileUri.toString());
-        assert.equal(state.content, 'bar', 'fs should be updated');
+        assert.equal(state.content.trimRight(), 'bar', 'fs should be updated');
     });
 
     it('delete file for saved', async () => {
@@ -320,7 +320,7 @@ describe('Saveable', function () {
         assert.isFalse(Saveable.isDirty(widget), 'should NOT be dirty after save');
         assert.isTrue(editor.document.valid, 'should be valid after save');
         const state = await fileSystem.resolveContent(fileUri.toString());
-        assert.equal(state.content, 'bar', 'fs should be updated');
+        assert.equal(state.content.trimRight(), 'bar', 'fs should be updated');
     });
 
     it('move file for saved', async function () {
