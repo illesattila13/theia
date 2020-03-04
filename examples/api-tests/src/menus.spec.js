@@ -17,7 +17,7 @@
 // @ts-check
 describe('Menus', function () {
 
-    const { BrowserMenuBarContribution } = require('@theia/core/lib/browser/menu/browser-menu-plugin');
+    const { BrowserMenuBarContribution } = require('@theia/core/lib/browser/menu/browser-main-menu-factory');
     const { ApplicationShell } = require('@theia/core/lib/browser/shell/application-shell');
     const { CallHierarchyContribution } = require('@theia/callhierarchy/lib/browser/callhierarchy-contribution');
     const { FileNavigatorContribution } = require('@theia/navigator/lib/browser/navigator-contribution');
