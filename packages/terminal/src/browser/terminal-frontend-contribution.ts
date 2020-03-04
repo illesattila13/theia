@@ -185,10 +185,10 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
             this.onDidChangeCurrentTerminalEmitter.fire(this._currentTerminal);
         }
     }
-    protected updateCurrentTerminal(): void {
-        const widget = this.shell.currentWidget;
-        if (widget instanceof TerminalWidget) {
-            this.setCurrentTerminal(widget);
+    protected updateCurrentTerminal(widget?: TerminalWidget): void {
+        const currentWidget = widget || this.shell.currentWidget;
+        if (currentWidget instanceof TerminalWidget) {
+            this.setCurrentTerminal(currentWidget);
         } else if (!this._currentTerminal || !this._currentTerminal.isVisible) {
             this.setCurrentTerminal(undefined);
         }
@@ -250,7 +250,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
                     return !this.shell.activeWidget.getSearchBox().isVisible;
                 }
                 return false;
-            } ,
+            },
             execute: () => {
                 const termWidget = (this.shell.activeWidget as TerminalWidget);
                 const terminalSearchBox = termWidget.getSearchBox();
@@ -273,11 +273,11 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         });
 
         commands.registerCommand(TerminalCommands.SCROLL_LINE_UP, {
-                isEnabled: () => this.shell.activeWidget instanceof TerminalWidget,
-                isVisible: () => false,
-                execute: () => {
-                    (this.shell.activeWidget as TerminalWidget).scrollLineUp();
-                }
+            isEnabled: () => this.shell.activeWidget instanceof TerminalWidget,
+            isVisible: () => false,
+            execute: () => {
+                (this.shell.activeWidget as TerminalWidget).scrollLineUp();
+            }
         });
         commands.registerCommand(TerminalCommands.SCROLL_LINE_DOWN, {
             isEnabled: () => this.shell.activeWidget instanceof TerminalWidget,
@@ -500,6 +500,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         } else if (op.mode === 'reveal') {
             this.shell.revealWidget(widget.id);
         }
+        this.updateCurrentTerminal(widget);
     }
 
     protected async selectTerminalCwd(): Promise<string | undefined> {

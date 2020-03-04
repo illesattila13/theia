@@ -18,6 +18,7 @@ import { inject, injectable } from 'inversify';
 import { ApplicationShell, WidgetManager, WidgetOpenerOptions } from '@theia/core/lib/browser';
 import { TerminalWidget } from '@theia/terminal/lib/browser/base/terminal-widget';
 import { TerminalWidgetFactoryOptions, TERMINAL_WIDGET_FACTORY_ID } from '@theia/terminal/lib/browser/terminal-widget-impl';
+import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
 import { TaskConfiguration, PanelKind } from '../common';
 import { TaskDefinitionRegistry } from './task-definition-registry';
 
@@ -51,6 +52,9 @@ export class TaskTerminalWidgetManager {
     @inject(TaskDefinitionRegistry)
     protected readonly taskDefinitionRegistry: TaskDefinitionRegistry;
 
+    @inject(TerminalService)
+    protected readonly terminalService: TerminalService;
+
     // Map indexed by terminal widget id
     protected terminalWidgetMap: Map<string, { isDedicated: boolean, taskConfig?: TaskConfiguration, widget: TerminalWidget }> = new Map();
 
@@ -70,11 +74,7 @@ export class TaskTerminalWidgetManager {
             widget.setTitle(options.title);
         }
 
-        if (options.mode === 'reveal') {
-            this.shell.revealWidget(widget.id);
-        } else if (options.mode === 'activate') {
-            this.shell.activateWidget(widget.id);
-        }
+        this.terminalService.open(widget, options);
 
         return widget;
     }
@@ -92,16 +92,23 @@ export class TaskTerminalWidgetManager {
                     this.taskDefinitionRegistry.compareTasks(options.taskConfig, taskConfig)) {
 
                     reusableTerminalWidget = widget;
+                    break;
                 }
             }
         } else if (TaskTerminalWidgetOpenerOptions.isSharedTerminal(options)) {
+            const availableWidgets: TerminalWidget[] = [];
             for (const { isDedicated, widget } of this.terminalWidgetMap.values()) {
                 // to run a task whose `taskPresentation === 'shared'`, the terminal to be used must be
                 // 1) not dedicated, and 2) idle
                 if (!isDedicated && !widget.hasRunningTask) {
-                    reusableTerminalWidget = widget;
+                    availableWidgets.push(widget);
                 }
             }
+            const currentWidget = availableWidgets.find(w => {
+                const currentTerminal = this.terminalService.currentTerminal;
+                return currentTerminal && currentTerminal.id === w.id;
+            });
+            reusableTerminalWidget = currentWidget || availableWidgets[0];
         }
 
         // we are unable to find a terminal widget to run the task, or `taskPresentation === 'new'`

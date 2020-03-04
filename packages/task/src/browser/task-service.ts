@@ -232,9 +232,9 @@ export class TaskService implements TaskConfigurationClient {
                                 if (terminal) {
                                     const focus = !!matchedRunningTaskInfo!.config.presentation!.focus;
                                     if (focus) { // assign focus to the terminal if presentation.focus is true
-                                        this.shell.activateWidget(terminal.id);
+                                        this.terminalService.open(terminal, { mode: 'activate' });
                                     } else { // show the terminal but not assign focus
-                                        this.shell.revealWidget(terminal.id);
+                                        this.terminalService.open(terminal, { mode: 'reveal' });
                                     }
                                 }
                             }
@@ -302,9 +302,9 @@ export class TaskService implements TaskConfigurationClient {
                         const focus = !!eventTaskConfig.presentation.focus;
                         if (terminal) {
                             if (focus) { // assign focus to the terminal if presentation.focus is true
-                                this.shell.activateWidget(terminal.id);
+                                this.terminalService.open(terminal, { mode: 'activate' });
                             } else { // show the terminal but not assign focus
-                                this.shell.revealWidget(terminal.id);
+                                this.terminalService.open(terminal, { mode: 'reveal' });
                             }
                         }
                     }
@@ -697,9 +697,9 @@ export class TaskService implements TaskConfigurationClient {
                 const terminal = this.terminalService.getById(this.getTerminalWidgetId(terminalId));
                 if (terminal && task.presentation) {
                     if (task.presentation.focus) { // assign focus to the terminal if presentation.focus is true
-                        this.shell.activateWidget(terminal.id);
+                        this.terminalService.open(terminal, { mode: 'activate' });
                     } else if (task.presentation.reveal === RevealKind.Always) { // show the terminal but not assign focus
-                        this.shell.revealWidget(terminal.id);
+                        this.terminalService.open(terminal, { mode: 'reveal' });
                     }
                 }
             }
