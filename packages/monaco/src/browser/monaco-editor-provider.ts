@@ -164,11 +164,6 @@ export class MonacoEditorProvider {
     protected suppressMonacoKeybindingListener(editor: MonacoEditor): void {
         let keydownListener: monaco.IDisposable | undefined;
         const keybindingService = editor.getControl()._standaloneKeybindingService;
-        if (!keybindingService) {
-            console.warn('Cannot suppresses Monaco keydown listener because KeybindingService is not recognized');
-            return;
-        }
-
         for (const listener of keybindingService._store._toDispose) {
             if ('_type' in listener && listener['_type'] === 'keydown') {
                 keydownListener = listener;
@@ -182,11 +177,6 @@ export class MonacoEditorProvider {
 
     protected injectKeybindingResolver(editor: MonacoEditor): void {
         const keybindingService = editor.getControl()._standaloneKeybindingService;
-        if (!keybindingService) {
-            console.warn('Cannot inject Keybinding Resolver because KeybindingService is not recognized');
-            return;
-        }
-
         keybindingService.resolveKeybinding = keybinding => [new MonacoResolvedKeybinding(MonacoResolvedKeybinding.keySequence(keybinding), this.keybindingRegistry)];
         keybindingService.resolveKeyboardEvent = keyboardEvent => {
             const keybinding = new monaco.keybindings.SimpleKeybinding(

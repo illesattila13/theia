@@ -47,6 +47,7 @@ declare module monaco.editor {
         readonly range: Range;
     }
 
+    // https://github.com/theia-ide/vscode/blob/standalone/0.19.x/src/vs/editor/standalone/browser/standaloneCodeEditor.ts#L205
     export interface IStandaloneCodeEditor extends CommonCodeEditor {
         setDecorations(decorationTypeKey: string, ranges: IDecorationOptions[]): void;
         setDecorationsFast(decorationTypeKey: string, ranges: IRange[]): void;
@@ -57,7 +58,7 @@ declare module monaco.editor {
             }
             resolveKeybinding(keybinding: monaco.keybindings.ChordKeybinding): monaco.keybindings.ResolvedKeybinding[];
             resolveKeyboardEvent(keyboardEvent: monaco.IKeyboardEvent): monaco.keybindings.ResolvedKeybinding;
-        } | null
+        }
     }
 
     // https://github.com/theia-ide/vscode/blob/standalone/0.19.x/src/vs/editor/browser/widget/codeEditorWidget.ts#L104
