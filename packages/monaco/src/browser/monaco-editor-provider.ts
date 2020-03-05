@@ -388,7 +388,7 @@ export class MonacoEditorProvider {
 
                     const modelPromise = Promise.resolve(model) as any;
                     modelPromise.cancel = () => { };
-                    openedEditor._contributions['editor.contrib.referencesController'].toggleWidget(range, modelPromise, false);
+                    openedEditor._contributions['editor.contrib.referencesController'].toggleWidget(range, modelPromise, true);
                     return;
                 }
 
