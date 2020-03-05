@@ -17,8 +17,11 @@
 import { ContainerModule } from 'inversify';
 import { bindDynamicLabelProvider } from './label/sample-dymanic-label-provider-command-contribution';
 import { bindSampleUnclosableView } from './view/sample-unclosable-view-contribution';
+import { FrontendApplicationContribution } from '@theia/core/lib/browser';
+import { SampleMainMenuUpdater } from './sample-main-menu-updater';
 
 export default new ContainerModule(bind => {
     bindDynamicLabelProvider(bind);
     bindSampleUnclosableView(bind);
+    bind(FrontendApplicationContribution).to(SampleMainMenuUpdater).inSingletonScope();
 });
