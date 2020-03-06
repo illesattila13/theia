@@ -109,6 +109,11 @@ export class PluginDeployerImpl implements PluginDeployer {
         this.logMeasurement('Deploy plugins list', startDeployTime);
     }
 
+    public async undeploy(pluginId: string): Promise<void> {
+        this.pluginDeployerHandler.removeDeployedPluginId(pluginId);
+        this.onDidDeployEmitter.fire();
+    }
+
     public async deploy(pluginEntry: string): Promise<void> {
         const startDeployTime = performance.now();
         await this.deployMultipleEntries([pluginEntry]);

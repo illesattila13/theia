@@ -57,6 +57,15 @@ export class HostedPluginDeployerHandler implements PluginDeployerHandler {
         return [...this.deployedBackendPlugins.keys()];
     }
 
+    removeDeployedPluginId(pluginId: string): void {
+        if (this.deployedBackendPlugins.get(pluginId)) {
+            this.deployedBackendPlugins.delete(pluginId);
+        }
+        if (this.deployedFrontendPlugins.get(pluginId)) {
+            this.deployedFrontendPlugins.delete(pluginId);
+        }
+    }
+
     getDeployedPlugin(pluginId: string): DeployedPlugin | undefined {
         const metadata = this.deployedBackendPlugins.get(pluginId);
         if (metadata) {

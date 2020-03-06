@@ -15,11 +15,10 @@
  ********************************************************************************/
 
 import { ContainerModule } from 'inversify';
-import { PluginDeployerFileHandler, PluginDeployerDirectoryHandler, PluginScanner, PluginDeployerResolver } from '@theia/plugin-ext';
+import { PluginDeployerFileHandler, PluginDeployerDirectoryHandler, PluginScanner } from '@theia/plugin-ext';
 import { PluginVsCodeFileHandler } from './plugin-vscode-file-handler';
 import { PluginVsCodeDirectoryHandler } from './plugin-vscode-directory-handler';
 import { VsCodePluginScanner } from './scanner-vscode';
-import { VsCodePluginDeployerResolver } from './plugin-vscode-resolver';
 import { PluginVsCodeCliContribution } from './plugin-vscode-cli-contribution';
 import { CliContribution } from '@theia/core/lib/node';
 import { PluginHostEnvironmentVariable } from '@theia/plugin-ext/lib/common';
@@ -28,10 +27,8 @@ export default new ContainerModule(bind => {
     bind(PluginDeployerFileHandler).to(PluginVsCodeFileHandler).inSingletonScope();
     bind(PluginDeployerDirectoryHandler).to(PluginVsCodeDirectoryHandler).inSingletonScope();
     bind(PluginScanner).to(VsCodePluginScanner).inSingletonScope();
-    bind(PluginDeployerResolver).to(VsCodePluginDeployerResolver).inSingletonScope();
 
     bind(PluginVsCodeCliContribution).toSelf().inSingletonScope();
     bind(CliContribution).toService(PluginVsCodeCliContribution);
     bind(PluginHostEnvironmentVariable).toService(PluginVsCodeCliContribution);
-}
-);
+});
